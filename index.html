@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enviar Progreso - ZGDPS Demon List</title>
+  <style>
+    :root {
+      --bg-color: #12131a;
+      --card-bg: #1c1e29;
+      --accent-color: #5865F2;
+      --accent-hover: #4752C4;
+      --green-color: #2ecc71;
+      --text-color: #ffffff;
+      --subtext-color: #a3a6b4;
+      --border-color: #2f3242;
+      --error-color: #e74c3c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 25px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--text-color);
+      font-size: 1.4rem;
+    }
+
+    .auth-box {
+      background: #14151d;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+      color: var(--subtext-color);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: #14151d;
+      color: var(--text-color);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent-color);
+    }
+
+    .btn-verify {
+      background-color: var(--accent-color);
+      color: #fff;
+      border: none;
+      width: 100%;
+      padding: 10px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-verify:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-submit {
+      background-color: var(--green-color);
+      color: #fff;
+      border: none;
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn-submit:disabled, input:disabled, select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-msg {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      text-align: center;
+      display: none;
+    }
+
+    .status-msg.error {
+      background-color: rgba(231, 76, 60, 0.2);
+      color: var(--error-color);
+      border: 1px solid var(--error-color);
+    }
+
+    .status-msg.success {
+      background-color: rgba(46, 204, 113, 0.2);
+      color: var(--green-color);
+      border: 1px solid var(--green-color);
+    }
+
+    .verified-badge {
+      color: var(--green-color);
+      font-size: 0.85rem;
+      margin-top: 6px;
+      display: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Envia un Progreso a ZGDPS</h2>
+
+    <!-- Paso de verificación por JSON -->
+    <div class="auth-box">
+      <div class="form-group" style="margin-bottom: 8px;">
+        <label for="verify-user">tu usuario del GDPS</label>
+        <input type="text" id="verify-user" placeholder="escribe tu usuario exacto">
+      </div>
+      <button type="button" class="btn-verify" onclick="verificarUsuario()">Verificar Autorización</button>
+      <div id="verified-badge" class="verified-badge">✓ Usuario autorizado correctamente</div>
+    </div>
+
+    <!-- Formulario de envío (Bloqueado hasta verificar) -->
+    <form id="progress-form">
+      <div class="form-group">
+        <label for="nivel">Escoge el nivel</label>
+        <select id="nivel" required disabled>
+          <option value="" disabled selected>-- Selecciona un nivel --</option>
+          <option value="Acheron">Acheron</option>
+          <option value="Bloodbath">Bloodbath</option>
+          <option value="Cataclysm">Cataclysm</option>
+          <option value="Sonic Wave">Sonic Wave</option>
+          <option value="Slaughterhouse">Slaughterhouse</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="porcentaje">Porcentaje alcanzado</label>
+        <input type="text" id="porcentaje" placeholder="Ejemplo: 100%" required disabled>
+      </div>
+
+      <div class="form-group">
+        <label for="link-prueba">Enlace de prueba (YouTube / TikTok)</label>
+        <input type="url" id="link-prueba" placeholder="https://youtu.be/..." required disabled>
+      </div>
+
+      <button type="submit" id="btn-submit" class="btn-submit" disabled>Enviar Progreso</button>
+    </form>
+
+    <div id="status-msg" class="status-msg"></div>
+  </div>
+
+  <script>
+    const WEBHOOK_URL = "https://discord.com/api/webhooks/1558265129831891025/8mpOtLpqGtyd1808KTIhNXM0SJYlzkAXPUIPGNOhwjlKJUSpMG8JgyiNhUXLyk713YKI";
+    let usuarioAutorizado = "";
+
+    async function verificarUsuario() {
+      const inputUser = document.getElementById("verify-user").value.trim();
+      if (!inputUser) {
+        mostrarMensaje("Por favor escribe un usuario.", true);
+        return;
+      }
+
+      try {
+        // Lee el archivo jugadores.json de tu repositorio
+        const response = await fetch("jugadores.json");
+        if (!response.ok) throw new Error("No se pudo cargar la lista de jugadores.");
+
+        const data = await response.json();
+        
+        // Comprueba si el usuario está en la lista (sin importar mayúsculas/minúsculas)
+        const encontrado = data.usuarios_permitidos.find(u => u.toLowerCase() === inputUser.toLowerCase());
+
+        if (encontrado) {
+          usuarioAutorizado = encontrado;
+          document.getElementById("verify-user").disabled = true;
+          document.querySelector(".btn-verify").style.display = "none";
+          document.getElementById("verified-badge").style.display = "block";
+          
+          // Habilitar formulario
+          document.getElementById("nivel").disabled = false;
+          document.getElementById("porcentaje").disabled = false;
+          document.getElementById("link-prueba").disabled = false;
+          document.getElementById("btn-submit").disabled = false;
+
+          mostrarMensaje("", false);
+          document.getElementById("status-msg").style.display = "none";
+        } else {
+          mostrarMensaje("Este usuario no está autorizado en la lista.", true);
+        }
+      } catch (err) {
+        mostrarMensaje("Error al verificar el archivo JSON.", true);
+      }
+    }
+
+    document.getElementById("progress-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (!usuarioAutorizado) {
+        mostrarMensaje("Debes verificar tu usuario primero.", true);
+        return;
+      }
+
+      const nivel = document.getElementById("nivel").value;
+      const porcentaje = document.getElementById("porcentaje").value.trim();
+      const link = document.getElementById("link-prueba").value.trim();
+
+      const mensajeContent = `**Nuevo Progreso Recibido**\n\n **Usuario:** ${usuarioAutorizado}\n **Nivel:** ${nivel} (${porcentaje})\n **Prueba:** ${link}`;
+
+      const payload = {
+        content: mensajeContent
+      };
+
+      try {
+        const res = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+          mostrarMensaje("¡Progreso enviado correctamente!", false);
+          document.getElementById("progress-form").reset();
+          // Bloquear de nuevo para otro envío si se desea
+        } else {
+          mostrarMensaje("Error al enviar al webhook de Discord.", true);
+        }
+      } catch (err) {
+        mostrarMensaje("Error de conexión con el webhook.", true);
+      }
+    });
+
+    function mostrarMensaje(texto, esError) {
+      const msgBox = document.getElementById("status-msg");
+      msgBox.textContent = texto;
+      msgBox.className = "status-msg " + (esError ? "error" : "success");
+      msgBox.style.display = "block";
+    }
+  </script>
+</body>
+</html>
